@@ -13,10 +13,25 @@ async function fetchVariants() {
     .then(data => variants = data)
   return variants;
 }
+
+async function fetchURL(url) {
+  var response;
+  await fetch(url)
+    .then(res => response = res)
+  return response
+}
 async function handleRequest(request) {
-  var variants = await fetchVariants();
-  console.log(variants)
-  return new Response('Hello worker!', {
-    headers: { 'content-type': 'text/plain' },
-  })
+  const variants = await fetchVariants();
+  const varOne = variants["variants"][0]
+  const varTwo = variants["variants"][1]
+  const randomN = Math.round(Math.random()) //either 0 or 1
+
+
+  if (randomN == 0) {
+    console.log(randomN)
+    return await fetchURL(varOne)
+  } else {
+    console.log(randomN)
+    return await fetchURL(varTwo)
+  }
 }
