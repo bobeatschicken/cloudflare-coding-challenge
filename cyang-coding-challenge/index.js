@@ -20,6 +20,14 @@ async function fetchURL(url) {
     .then(res => response = res)
   return response
 }
+
+const REWRITER = new HTMLRewriter()
+  .on('title', { element: e => e.setInnerContent("bobeatschicken") })
+  .on('h1#title', { element: e => e.setInnerContent("Christopher Yang") })
+  .on('p#description', { element: e => e.setInnerContent("Thank you Cloudflare for doubling the intern class size to accomodate for those who have had their internships cancelled due to the COVID-19 pandemic! <3") })
+  .on('a#url', { element: e => e.setInnerContent("Link to my GitHub (pardon the name; I made it when I was in middle school lol)") })
+  .on('a#url', { element: e => e.setAttribute("href", "https://github.com/bobeatschicken") })
+
 async function handleRequest(request) {
   const variants = await fetchVariants();
   const varOne = variants["variants"][0]
@@ -29,9 +37,11 @@ async function handleRequest(request) {
 
   if (randomN == 0) {
     console.log(randomN)
-    return await fetchURL(varOne)
+    const res = await fetchURL(varOne)
+    return REWRITER.transform(res)
   } else {
     console.log(randomN)
-    return await fetchURL(varTwo)
+    const res = await fetchURL(varTwo)
+    return REWRITER.transform(res)
   }
 }
