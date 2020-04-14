@@ -39,13 +39,25 @@ async function handleRequest(request) {
   const data = await fetchVariants();
   const varOne = data["variants"][0]
   const varTwo = data["variants"][1]
-  let randomN = Math.round(Math.random()) //either 0 or 1
 
-  let cookies = request.headers.get('Cookie') || ""
-  if (cookies.includes("returning")) { //if cookie exists, set randomN to key-value 
-    randomN = parseInt(cookies.substring(10))
+  let cookiesStr = request.headers.get('Cookie') || ""
+  let cookiesArr = cookiesStr.split(";") // in case of multiple cookies
+  let cookieFound = null
+  cookiesArr.forEach(cookie => {
+    if (cookie.includes("returning"))
+      cookieFound = cookie
+  });
+  if (cookieFound) { //if cookie exists, set randomN to key-value 
+    let randomN = parseInt(cookieFound.substring(11))
+    if (randomN === 0) {
+      let res = await fetchURL(varOne)
+      return REWRITER_V1.transform(res)
+    } else {
+      let res = await fetchURL(varTwo)
+      return REWRITER_V2.transform(res)
+    }
   } else { //if cookie doesn't exist, create cookie
-    let res = null;
+    let randomN = Math.round(Math.random()) //either 0 or 1
     if (randomN == 0) {
       let res = await fetchURL(varOne)
       res = new Response(res.body, res)
@@ -59,12 +71,5 @@ async function handleRequest(request) {
       res.headers.set("Set-Cookie", cookieStr)
       return REWRITER_V2.transform(res)
     }
-  } //this part only executes if cookie exists; persist variant based on what the value of randomN was stored in cookie
-  if (randomN == 0) {
-    let res = await fetchURL(varOne)
-    return REWRITER_V1.transform(res)
-  } else {
-    let res = await fetchURL(varTwo)
-    return REWRITER_V2.transform(res)
   }
 }
