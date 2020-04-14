@@ -8,19 +8,14 @@ addEventListener('fetch', event => {
 
 async function fetchVariants() {
   var variants;
-  fetch("https://cfw-takehome.developers.workers.dev/api/variants")
-    .then(res => res.json())
-    .then(data => variants = data)
-    .then(() => console.log("first ", variants))
-  console.log("second ", variants);
-}
-async function handleRequest(request) {
-  var variants;
   await fetch("https://cfw-takehome.developers.workers.dev/api/variants")
     .then(res => res.json())
     .then(data => variants = data)
-    .then(() => console.log("first ", variants))
-  console.log("second", variants);
+  return variants;
+}
+async function handleRequest(request) {
+  var variants = await fetchVariants();
+  console.log(variants)
   return new Response('Hello worker!', {
     headers: { 'content-type': 'text/plain' },
   })
