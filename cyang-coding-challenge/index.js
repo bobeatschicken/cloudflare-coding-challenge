@@ -11,6 +11,9 @@ async function fetchVariants() {
   await fetch("https://cfw-takehome.developers.workers.dev/api/variants")
     .then(res => res.json())
     .then(data => variants = data)
+    .catch(function (err) {
+      console.log('Error: ', err);
+    });
   return variants;
 }
 
@@ -18,6 +21,9 @@ async function fetchURL(url) {
   var response;
   await fetch(url)
     .then(res => response = res)
+    .catch(function (err) {
+      console.log('Error: ', err);
+    });
   return response
 }
 
@@ -37,37 +43,47 @@ const REWRITER_V2 = new HTMLRewriter()
 
 async function handleRequest(request) {
   const data = await fetchVariants();
-  const varOne = data["variants"][0]
-  const varTwo = data["variants"][1]
+  const variantOne = data["variants"][0]
+  const variantTwo = data["variants"][1]
+  var variantSelector = null;
 
   let cookiesStr = request.headers.get('Cookie') || ""
-  let cookiesArr = cookiesStr.split(";") // in case of multiple cookies
+  let cookiesArr = cookiesStr.split(";")
   let cookieFound = null
   cookiesArr.forEach(cookie => {
     if (cookie.includes("returning"))
       cookieFound = cookie
   });
-  if (cookieFound) { //if cookie exists, set randomN to key-value 
-    let randomN = parseInt(cookieFound.substring(11))
-    if (randomN === 0) {
-      let res = await fetchURL(varOne)
+  if (cookieFound) //if cookie exists, set variantSelector to the value of the cookie-key
+  {
+    variantSelector = parseInt(cookieFound.slice(-1))
+    if (variantSelector === 0) 
+    {
+      let res = await fetchURL(variantOne)
       return REWRITER_V1.transform(res)
-    } else {
-      let res = await fetchURL(varTwo)
+    }
+    else 
+    {
+      let res = await fetchURL(variantTwo)
       return REWRITER_V2.transform(res)
     }
-  } else { //if cookie doesn't exist, create cookie
-    let randomN = Math.round(Math.random()) //either 0 or 1
-    if (randomN == 0) {
-      let res = await fetchURL(varOne)
+  }
+  else //if cookie doesn't exist, randomly redirect to one of the variants and create cookie to persist for every url revisit
+  {
+    variantSelector = Math.round(Math.random()) //either 0 or 1; 0 corresponds to variantOne; 1 corresponds to variantTwo;
+    if (variantSelector == 0) 
+    {
+      let res = await fetchURL(variantOne)
       res = new Response(res.body, res)
-      let cookieStr = "returning=" + randomN.toString()
+      let cookieStr = "returning=" + variantSelector.toString()
       res.headers.set("Set-Cookie", cookieStr)
       return REWRITER_V1.transform(res)
-    } else {
-      let res = await fetchURL(varTwo)
+    }
+    else 
+    {
+      let res = await fetchURL(variantTwo)
       res = new Response(res.body, res)
-      let cookieStr = "returning=" + randomN.toString()
+      let cookieStr = "returning=" + variantSelector.toString()
       res.headers.set("Set-Cookie", cookieStr)
       return REWRITER_V2.transform(res)
     }
