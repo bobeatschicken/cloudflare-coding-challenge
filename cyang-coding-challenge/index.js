@@ -1,10 +1,10 @@
+const VARIANT_DESCRIPTION = "Thank you Cloudflare for doubling the intern class size to accomodate for those who have had their internships cancelled due to the COVID-19 pandemic! <3"
+const GITHUB_URL = "https://github.com/bobeatschicken"
+const LINKEDIN_URL = "https://www.linkedin.com/in/christopher-y-9b595b114/"
+
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
-/**
- * Respond with hello worker text
- * @param {Request} request
- */
 
 async function fetchVariants() {
   var variants;
@@ -30,16 +30,16 @@ async function fetchURL(url) {
 const REWRITER_V1 = new HTMLRewriter()
   .on('title', { element: e => e.setInnerContent("CYang - Variant One") })
   .on('h1#title', { element: e => e.setInnerContent("Christopher Yang (Variant One)") })
-  .on('p#description', { element: e => e.setInnerContent("Thank you Cloudflare for doubling the intern class size to accomodate for those who have had their internships cancelled due to the COVID-19 pandemic! <3") })
+  .on('p#description', { element: e => e.setInnerContent(VARIANT_DESCRIPTION) })
   .on('a#url', { element: e => e.setInnerContent("Link to my GitHub (pardon the name; I made it when I was in middle school)") })
-  .on('a#url', { element: e => e.setAttribute("href", "https://github.com/bobeatschicken") })
+  .on('a#url', { element: e => e.setAttribute("href", GITHUB_URL) })
 
 const REWRITER_V2 = new HTMLRewriter()
   .on('title', { element: e => e.setInnerContent("CYang - Variant Two") })
   .on('h1#title', { element: e => e.setInnerContent("Christopher Yang (Variant Two)") })
-  .on('p#description', { element: e => e.setInnerContent("Thank you Cloudflare for doubling the intern class size to accomodate for those who have had their internships cancelled due to the COVID-19 pandemic! <3") })
-  .on('a#url', { element: e => e.setInnerContent("Link to my GitHub (pardon the name; I made it when I was in middle school)") })
-  .on('a#url', { element: e => e.setAttribute("href", "https://github.com/bobeatschicken") })
+  .on('p#description', { element: e => e.setInnerContent(VARIANT_DESCRIPTION) })
+  .on('a#url', { element: e => e.setInnerContent("Link to my LinkedIn") })
+  .on('a#url', { element: e => e.setAttribute("href", LINKEDIN_URL) })
 
 async function handleRequest(request) {
   const data = await fetchVariants();
